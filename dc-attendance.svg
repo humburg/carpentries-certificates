@@ -1281,7 +1281,7 @@
          y="25.6"
          font-size="14"
          id="tspan6266"
-         style="font-size:14px;font-family:ArialMT;fill:#808285">data skills training run by Data Carpentry.</tspan><tspan
+         style="font-size:14px;font-family:ArialMT;fill:#808285">data skills training run by Data Carpentry and {{institution}}.</tspan><tspan
          x="0"
          y="51.200001"
          font-size="14"

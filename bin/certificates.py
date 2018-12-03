@@ -28,6 +28,28 @@ where:
 The script then looks for $(ROOT_DIRECTORY)/$(BADGE_TYPE).svg as a template
 file, and creates $(ROOT_DIRECTORY)/$(BADGE_TYPE)/$(USER_ID).pdf as output.
 
+Alternatively, use separate directories for the template and output directly:
+
+python bin/certificates.py \
+       -b swc-instructor
+       -t $HOME/sc/certification/ \
+       -o $HOME/sc/certification/certificates/ \
+       -u turing_alan
+       date='January 24, 1924' \
+       instructor='Ada Lovelace' \
+       name='Alan Turing'
+
+where:
+
+    -b:         BADGE_TYPE
+    -t:         TEMPLATE_DIRECTORY
+    -o:         OUTPUT_DIRECTORY
+    -u:         USER_ID
+    name=value: fill-ins for the template
+
+In this case the script will look for $(TEMPLATE_DIRECTORY)/$(BADGE_TYPE).svg as template
+file and create $(OUTPUT_DIRECTORY)/$(BADGE_TYPE)_$(USER_ID).pdf as output.
+
 This script will also take a CSV file as input.  The file must contain rows of:
 
     badge,trainer,user_id,new_instructor,email,date
@@ -81,6 +103,10 @@ def parse_args():
                       default=None, dest='badge_type', help='Type of badge')
     parser.add_option('-r', '--root',
                       default=os.getcwd(), dest='root_dir', help='Root directory (current by default)')
+    parser.add_option('-t', '--template',
+                      default=os.getcwd(), dest='template_dir', help='Template directory (current by default)')
+    parser.add_option('-o', '--output',
+                      default=None, dest='out_dir', help='Output directory (default is <root>/<badge>/)')
     parser.add_option('-u', '--userid',
                       default=None, dest='user_id', help='User ID')
     parser.add_option('-c', '--csv',

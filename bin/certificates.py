@@ -28,11 +28,12 @@ where:
 The script then looks for $(ROOT_DIRECTORY)/$(BADGE_TYPE).svg as a template
 file, and creates $(ROOT_DIRECTORY)/$(BADGE_TYPE)/$(USER_ID).pdf as output.
 
-Alternatively, use separate directories for the template and output directly:
+Alternatively, output can be directed to a different directory with the '-o'
+option:
 
 python bin/certificates.py \
        -b swc-instructor
-       -t $HOME/sc/certification/ \
+       -r $HOME/sc/certification/ \
        -o $HOME/sc/certification/certificates/ \
        -u turing_alan
        date='January 24, 1924' \
@@ -42,12 +43,12 @@ python bin/certificates.py \
 where:
 
     -b:         BADGE_TYPE
-    -t:         TEMPLATE_DIRECTORY
+    -r:         ROOT_DIRECTORY
     -o:         OUTPUT_DIRECTORY
     -u:         USER_ID
     name=value: fill-ins for the template
 
-In this case the script will look for $(TEMPLATE_DIRECTORY)/$(BADGE_TYPE).svg as template
+In this case the script will look for $(ROOT_DIRECTORY)/$(BADGE_TYPE).svg as template
 file and create $(OUTPUT_DIRECTORY)/$(BADGE_TYPE)_$(USER_ID).pdf as output.
 
 This script will also take a CSV file as input.  The file must contain rows of:
@@ -103,8 +104,6 @@ def parse_args():
                       default=None, dest='badge_type', help='Type of badge')
     parser.add_option('-r', '--root',
                       default=os.getcwd(), dest='root_dir', help='Root directory (current by default)')
-    parser.add_option('-t', '--template',
-                      default=os.getcwd(), dest='template_dir', help='Template directory (current by default)')
     parser.add_option('-o', '--output',
                       default=None, dest='out_dir', help='Output directory (default is <root>/<badge>/)')
     parser.add_option('-u', '--userid',
@@ -125,6 +124,8 @@ def parse_args():
     args.params = extract_parameters(extras)
     if 'date' not in args.params:
         args.params['date'] = date.strftime(date.today(), DATE_FORMAT)
+    if args.out_dir is None:
+        args.out_dir = os.path.join(args.root_dir, args.badge)
 
     return args
 
@@ -155,14 +156,14 @@ def process_csv(args):
                 d = date(*d[:3])
                 args.params['date'] = date.strftime(d, DATE_FORMAT)
             template_path = construct_template_path(args.root_dir, badge_type)
-            output_path = construct_output_path(args.root_dir, badge_type, user_id)
+            output_path = construct_output_path(args.out_dir, badge_type, user_id)
             create_certificate(template_path, output_path, args.params)
 
 def process_single(args):
     '''Process a single entry.'''
 
     template_path = construct_template_path(args.root_dir, args.badge_type)
-    output_path = construct_output_path(args.root_dir, args.badge_type, args.user_id)
+    output_path = construct_output_path(args.out_dir, args.badge_type, args.user_id)
     create_certificate(template_path, output_path, args.params)
 
 
@@ -172,10 +173,15 @@ def construct_template_path(root_dir, badge_type):
     return os.path.join(root_dir, badge_type + '.svg')
 
 
-def construct_output_path(root_dir, badge_type, user_id):
+def construct_output_path(out_dir, badge_type, user_id):
     '''Create path for generated PDF certificate.'''
 
-    return os.path.join(root_dir, badge_type, user_id + '.pdf')
+    out_path = out_dir
+    if badge_type in out_path:
+        out_path = os.path.join(out_dir, user_id + '.pdf')
+    else:
+        out_path = os.path.join(out_dir, badge_type + '_' + user_id + '.pdf')
+    return out_path
 
 
 def create_certificate(template_path, output_path, params):

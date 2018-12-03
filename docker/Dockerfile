@@ -7,4 +7,5 @@ WORKDIR /usr/src/certificates
 RUN git checkout docker
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD [ "python", "./bin/certificates.py" ]
+ENTRYPOINT [ "python", "./bin/certificates.py" ]
+CMD ["--help"]
